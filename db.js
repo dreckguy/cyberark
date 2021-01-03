@@ -8,7 +8,7 @@ const db = new Database(DB_URL);
 const collection = db.collection(COLLECTION_NAME);
 
 exports.loadDbWithData = function(){
-    console.log('Init!')
+    console.log('loading famous directors to db')
     collection.create(COLLECTION_NAME).then(
             () => {
             console.log('Collection created')
