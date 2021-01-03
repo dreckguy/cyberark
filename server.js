@@ -1,5 +1,5 @@
 //SETTING STATIC NAMES
-const SERVER_PORT = 80
+const SERVER_PORT = 4000
 const db = require('./db')
 //SETTING SERVER
 const express = require('express');
@@ -8,16 +8,14 @@ const app = express()
 app.use(bodyParser.json());
 app.get('/', (req, res) => res.send('server is on air!\n'))
 app.get('/directors', (req, res) => {
-    
-  
-  res.json(famousDirectors)
+  db.getAllDirectors()
+  .then(directors=> res.json(directors))
+  .catch(err=> console.error(`Err: ${err.message}`))
 });
 
 console.log('Started!')
-//CREATE THE NEEDED DATA ON THE DB
-db.prepareDB()
 //START THE SERVER
-app.listen(80);
+app.listen(SERVER_PORT);
 console.log(`Server is listenning on port ${SERVER_PORT}`);
 
 
