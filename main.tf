@@ -61,12 +61,24 @@ from_port = 22
 }
 
 resource "aws_instance" "test" {
-  ami = "ami-0be656e75e69af1a9"
+  ami = "ami-0a09486b18ca1a617"
   instance_type = "t2.micro"
   key_name = "dreckguy"
   subnet_id = aws_subnet.subnet-uno.id
   vpc_security_group_ids = [aws_security_group.ssh.id]
     associate_public_ip_address = true
+
+    provisioner "file" {
+    source      = "docker-compose.yml"
+    destination = "/home/ubuntu/docker-compose.yml"
+
+    connection {
+      type = "ssh"
+      user = "ubuntu"
+      host = self.public_ip
+      private_key = file("key.pem")
+    }
+  }
 
     provisioner "remote-exec" {
     connection {
@@ -77,8 +89,7 @@ resource "aws_instance" "test" {
     }
 
     scripts = [
-                "scripts/install_docker_ubuntu_20.04.sh",
-                "deploy.sh"
+                "scripts/install_docker_ubuntu_20.04.sh"
               ]
   }
 
