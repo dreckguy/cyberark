@@ -104,3 +104,5 @@ dist
 
 # TernJS port file
 .tern-port
+terraform.tfstate
+terraform.tfstate.backup
