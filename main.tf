@@ -11,39 +11,40 @@ provider "aws" {
   region  = "eu-central-1"
 }
 
-resource "aws_vpc" "test-env" {
+resource "aws_vpc" "cyberark-homework" {
   cidr_block = "10.0.0.0/16"
   enable_dns_hostnames = true
   enable_dns_support = true
 }
 
-resource "aws_subnet" "subnet-uno" {
-  cidr_block = "${cidrsubnet(aws_vpc.test-env.cidr_block, 3, 1)}"
-  vpc_id = "${aws_vpc.test-env.id}"
+resource "aws_subnet" "cyberark-homework" {
+  cidr_block = "${cidrsubnet(aws_vpc.cyberark-homework.cidr_block, 3, 1)}"
+  vpc_id = "${aws_vpc.cyberark-homework.id}"
   availability_zone = "eu-central-1a"
 }
 
-resource "aws_internet_gateway" "test-env-gw" {
-  vpc_id = "${aws_vpc.test-env.id}"
+resource "aws_internet_gateway" "cyberark-homework" {
+  vpc_id = "${aws_vpc.cyberark-homework.id}"
 
 }
 
-resource "aws_route_table" "route-table-test-env" {
-  vpc_id = "${aws_vpc.test-env.id}"
+resource "aws_route_table" "route-table-cyberark-homework" {
+  vpc_id = "${aws_vpc.cyberark-homework.id}"
 route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = "${aws_internet_gateway.test-env-gw.id}"
+    gateway_id = "${aws_internet_gateway.cyberark-homework.id}"
   }
 
 }
 resource "aws_route_table_association" "subnet-association" {
-  subnet_id      = "${aws_subnet.subnet-uno.id}"
-  route_table_id = "${aws_route_table.route-table-test-env.id}"
+  subnet_id      = "${aws_subnet.cyberark-homework
+.id}"
+  route_table_id = "${aws_route_table.route-table-cyberark-homework.id}"
 }
 
 resource "aws_security_group" "ssh" {
 name = "allow-ssh-from-anywhere"
-vpc_id = "${aws_vpc.test-env.id}"
+vpc_id = "${aws_vpc.cyberark-homework.id}"
 ingress {
     cidr_blocks = [
       "0.0.0.0/0"
@@ -60,11 +61,11 @@ from_port = 22
  }
 }
 
-resource "aws_instance" "test" {
+resource "aws_instance" "web-app-1" {
   ami = "ami-0a09486b18ca1a617"
   instance_type = "t2.micro"
   key_name = "dreckguy"
-  subnet_id = aws_subnet.subnet-uno.id
+  subnet_id = aws_subnet.cyberark-homework.id
   vpc_security_group_ids = [aws_security_group.ssh.id]
     associate_public_ip_address = true
 
@@ -94,7 +95,7 @@ resource "aws_instance" "test" {
   }
 
 }
-output "instance_ip" {
+output "web-app-1_ip" {
   description = "The public ip for ssh access"
-  value = aws_instance.test.public_ip
+  value = aws_instance.web-app-1.public_ip
 }
