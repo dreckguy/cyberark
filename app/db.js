@@ -29,4 +29,3 @@ exports.getAllDirectors = async function(){
     const directors = data._result.map(object => ({director:object.director,film:object.film}))
     return directors
 }
-
