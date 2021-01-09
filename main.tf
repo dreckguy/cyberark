@@ -89,8 +89,8 @@ resource "aws_instance" "web-app-1" {
     associate_public_ip_address = true
 
     provisioner "file" {
-    source      = "docker-compose.yml"
-    destination = "/home/ubuntu/docker-compose.yml"
+    source      = "compose/"
+    destination = "/home/ubuntu/"
 
     connection {
       type = "ssh"
@@ -123,6 +123,9 @@ resource "aws_instance" "db" {
   vpc_security_group_ids = [aws_security_group.ssh.id,aws_security_group.arangodb.id]
     associate_public_ip_address = true
 
+    provisioner "local-exec" {
+    command = "echo ${self.public_ip} >> compose/.env"
+  }
 
     provisioner "remote-exec" {
     connection {

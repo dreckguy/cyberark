@@ -2,12 +2,14 @@ version: '3'
 services:
   proxy:
     image: dreckguy/cyberark-nginx-proxy
-    build: ./proxy
+    build: ../proxy
 
     ports:
       - 80:80
   app:
     image: dreckguy/cyberark-app
-    build: ./app
+    build: ../app
     ports:
       - 4000:4000
+    environment:
+     - DB_URL=http://${db_ip}:8529
