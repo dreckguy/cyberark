@@ -43,7 +43,7 @@ resource "aws_route_table_association" "subnet-association" {
 }
 
 resource "aws_security_group" "ssh" {
-name = "allow-ssh-from-anywhere"
+name = "ssh"
 vpc_id = "${aws_vpc.cyberark-homework.id}"
 ingress {
     cidr_blocks = [
@@ -51,6 +51,25 @@ ingress {
     ]
 from_port = 22
     to_port = 22
+    protocol = "tcp"
+  }
+  egress {
+   from_port = 0
+   to_port = 0
+   protocol = "-1"
+   cidr_blocks = ["0.0.0.0/0"]
+ }
+}
+
+resource "aws_security_group" "arangodb" {
+name = "arangodb"
+vpc_id = "${aws_vpc.cyberark-homework.id}"
+ingress {
+    cidr_blocks = [
+      "0.0.0.0/0"
+    ]
+from_port = 8529
+    to_port = 8529
     protocol = "tcp"
   }
   egress {
@@ -95,7 +114,36 @@ resource "aws_instance" "web-app-1" {
   }
 
 }
+
+resource "aws_instance" "db" {
+  ami = "ami-0a09486b18ca1a617"
+  instance_type = "t2.micro"
+  key_name = "dreckguy"
+  subnet_id = aws_subnet.cyberark-homework.id
+  vpc_security_group_ids = [aws_security_group.ssh.id,aws_security_group.arangodb.id]
+    associate_public_ip_address = true
+
+
+    provisioner "remote-exec" {
+    connection {
+      type = "ssh"
+      user = "ubuntu"
+      host = self.public_ip
+      private_key = file("key.pem")
+    }
+
+    scripts = [
+                "scripts/install_docker_ubuntu_20.04.sh"
+              ]
+  }
+
+}
 output "web-app-1_ip" {
   description = "The public ip for ssh access"
   value = aws_instance.web-app-1.public_ip
+}
+
+output "db_ip" {
+  description = "The public ip for ssh access"
+  value = aws_instance.db.public_ip
 }
