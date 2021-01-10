@@ -11,81 +11,113 @@ provider "aws" {
   region  = "eu-central-1"
 }
 
-resource "aws_vpc" "cyberark-homework" {
+resource "aws_vpc" "default" {
   cidr_block = "10.0.0.0/16"
-  enable_dns_hostnames = true
-  enable_dns_support = true
 }
 
-resource "aws_subnet" "cyberark-homework" {
-  cidr_block = "${cidrsubnet(aws_vpc.cyberark-homework.cidr_block, 3, 1)}"
-  vpc_id = "${aws_vpc.cyberark-homework.id}"
-  availability_zone = "eu-central-1a"
+# Create an internet gateway to give our subnet access to the outside world
+resource "aws_internet_gateway" "default" {
+  vpc_id = aws_vpc.default.id
 }
 
-resource "aws_internet_gateway" "cyberark-homework" {
-  vpc_id = "${aws_vpc.cyberark-homework.id}"
-
+# Grant the VPC internet access on its main route table
+resource "aws_route" "internet_access" {
+  route_table_id         = aws_vpc.default.main_route_table_id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.default.id
 }
 
-resource "aws_route_table" "route-table-cyberark-homework" {
-  vpc_id = "${aws_vpc.cyberark-homework.id}"
-route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = "${aws_internet_gateway.cyberark-homework.id}"
+# Create a subnet to launch our instances into
+resource "aws_subnet" "default" {
+  vpc_id                  = aws_vpc.default.id
+  cidr_block              = "10.0.1.0/24"
+  map_public_ip_on_launch = true
+}
+
+# A security group for the ELB so it is accessible via the web
+resource "aws_security_group" "elb" {
+  name        = "terraform_example_elb"
+  description = "Used in the terraform"
+  vpc_id      = aws_vpc.default.id
+
+  # HTTP access from anywhere
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
-}
-resource "aws_route_table_association" "subnet-association" {
-  subnet_id      = "${aws_subnet.cyberark-homework
-.id}"
-  route_table_id = "${aws_route_table.route-table-cyberark-homework.id}"
-}
-
-resource "aws_security_group" "ssh" {
-name = "ssh"
-vpc_id = "${aws_vpc.cyberark-homework.id}"
-ingress {
-    cidr_blocks = [
-      "0.0.0.0/0"
-    ]
-from_port = 22
-    to_port = 22
-    protocol = "tcp"
-  }
+  # outbound internet access
   egress {
-   from_port = 0
-   to_port = 0
-   protocol = "-1"
-   cidr_blocks = ["0.0.0.0/0"]
- }
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
-resource "aws_security_group" "arangodb" {
-name = "arangodb"
-vpc_id = "${aws_vpc.cyberark-homework.id}"
-ingress {
-    cidr_blocks = [
-      "0.0.0.0/0"
-    ]
-from_port = 8529
-    to_port = 8529
-    protocol = "tcp"
+# Our default security group to access
+# the instances over SSH and HTTP
+resource "aws_security_group" "default" {
+  name        = "terraform_example"
+  description = "Used in the terraform"
+  vpc_id      = aws_vpc.default.id
+
+  # SSH access from anywhere
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
+
+  # HTTP Web from the VPC
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+  # HTTP Arangodb access from the VPC
+
+  ingress {
+    from_port   = 8529
+    to_port     = 8529
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+
+  # outbound internet access
   egress {
-   from_port = 0
-   to_port = 0
-   protocol = "-1"
-   cidr_blocks = ["0.0.0.0/0"]
- }
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_elb" "web" {
+  name = "terraform-example-elb"
+
+  subnets         = [aws_subnet.default.id]
+  security_groups = [aws_security_group.elb.id]
+  instances       = [aws_instance.web-app-1.id]
+
+  listener {
+    instance_port     = 80
+    instance_protocol = "http"
+    lb_port           = 80
+    lb_protocol       = "http"
+  }
 }
 
 resource "aws_instance" "web-app-1" {
   ami = "ami-0a09486b18ca1a617"
   instance_type = "t2.micro"
   key_name = "dreckguy"
-  subnet_id = aws_subnet.cyberark-homework.id
-  vpc_security_group_ids = [aws_security_group.ssh.id]
+  subnet_id = aws_subnet.default.id
+  vpc_security_group_ids = [aws_security_group.default.id]
     associate_public_ip_address = true
 
     provisioner "file" {
@@ -119,13 +151,9 @@ resource "aws_instance" "db" {
   ami = "ami-0a09486b18ca1a617"
   instance_type = "t2.micro"
   key_name = "dreckguy"
-  subnet_id = aws_subnet.cyberark-homework.id
-  vpc_security_group_ids = [aws_security_group.ssh.id,aws_security_group.arangodb.id]
+  subnet_id = aws_subnet.default.id
+  vpc_security_group_ids = [aws_security_group.default.id]
     associate_public_ip_address = true
-
-    provisioner "local-exec" {
-    command = "echo ${self.public_ip} >> compose/.env"
-  }
 
     provisioner "remote-exec" {
     connection {
@@ -141,6 +169,7 @@ resource "aws_instance" "db" {
   }
 
 }
+
 output "web-app-1_ip" {
   description = "The public ip for ssh access"
   value = aws_instance.web-app-1.public_ip
