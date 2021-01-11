@@ -144,7 +144,6 @@ resource "aws_instance" "web-app-1" {
                 "scripts/install_docker_ubuntu_20.04.sh"
               ]
   }
-
 }
 
 resource "aws_instance" "db" {
@@ -162,12 +161,10 @@ resource "aws_instance" "db" {
       host = self.public_ip
       private_key = file("key.pem")
     }
-
     scripts = [
                 "scripts/install_docker_ubuntu_20.04.sh"
               ]
   }
-
 }
 
 output "web-app-1_ip" {
@@ -178,4 +175,9 @@ output "web-app-1_ip" {
 output "db_ip" {
   description = "The public ip for ssh access"
   value = aws_instance.db.public_ip
+}
+
+output "lb_dns" {
+  description = "dns of the elastic load balancer"
+  value = aws_elb.web.dns_name
 }
