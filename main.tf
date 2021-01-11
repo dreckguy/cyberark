@@ -150,7 +150,7 @@ resource "aws_instance" "web-app-1" {
 resource "aws_instance" "db" {
   ami = "ami-0a09486b18ca1a617"
   instance_type = "t2.micro"
-  key_name = "dreckguy"
+  key_name = "key"
   subnet_id = aws_subnet.default.id
   vpc_security_group_ids = [aws_security_group.default.id]
     associate_public_ip_address = true
