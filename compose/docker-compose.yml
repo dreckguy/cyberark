@@ -1,11 +1,13 @@
 version: '3'
 services:
   proxy:
+    #build: '../proxy'
     image: dreckguy/cyberark-nginx-proxy
 
     ports:
       - 80:80
   app:
+    #build: ../app
     image: dreckguy/cyberark-app
     ports:
       - 4000:4000

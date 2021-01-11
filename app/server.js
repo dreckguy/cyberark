@@ -1,6 +1,12 @@
 //SETTING STATIC NAMES
 const SERVER_PORT = 4000
 const db = require('./db')
+console.log('directors to send when needed:')
+db.getAllDirectors().then(data=>{
+  console.log(data)
+}).catch(err=>{
+  console.error(`Error: ${err.message}`)
+})
 //SETTING SERVER
 const express = require('express');
 const bodyParser = require('body-parser');
