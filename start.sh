@@ -10,6 +10,6 @@ ssh -i key.pem -o "StrictHostKeyChecking no" ubuntu@$DB_IP "docker run -p 8529:8
 scp -i key.pem -o "StrictHostKeyChecking no" compose/.env ubuntu@$WEB_APP_1_IP:/home/ubuntu/
 ssh -i key.pem -o "StrictHostKeyChecking no" ubuntu@$WEB_APP_1_IP "docker-compose -f /home/ubuntu/docker-compose.yml pull"
 ssh -i key.pem -o "StrictHostKeyChecking no" ubuntu@$WEB_APP_1_IP "docker-compose -f /home/ubuntu/docker-compose.yml run app init.js"
-ssh -i key.pem -o "StrictHostKeyChecking no" ubuntu@$WEB_APP_1_IP "docker-compose -f /home/ubuntu/docker-compose.yml docker-compose up"
+ssh -i key.pem -o "StrictHostKeyChecking no" ubuntu@$WEB_APP_1_IP "docker-compose -f /home/ubuntu/docker-compose.yml up"
 echo "reading directors:"
 curl "$LB_DNS/directors"
