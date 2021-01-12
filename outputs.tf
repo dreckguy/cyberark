@@ -13,7 +13,6 @@ output "db_private_ip" {
   value = aws_instance.db.private_ip
 }
 
-
 output "lb_dns" {
   description = "dns of the elastic load balancer"
   value = aws_elb.web.dns_name
