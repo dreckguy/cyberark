@@ -14,4 +14,4 @@ ssh -i key.pem -o "StrictHostKeyChecking no" ubuntu@$WEB_APP_1_IP "docker-compos
 sleep 2m
 echo "reading directors:"
 curl "$LB_DNS/directors\n"
-echo "Ready to show famous directors and their films on:\n$LB_DNS/directors"
+echo -e "Ready to show famous directors and their films on:\n$LB_DNS/directors"
