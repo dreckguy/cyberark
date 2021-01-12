@@ -64,7 +64,7 @@ resource "aws_security_group" "default" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["10.0.1.0/24"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
   # HTTP Arangodb access from the VPC
 
@@ -72,7 +72,7 @@ resource "aws_security_group" "default" {
     from_port   = 8529
     to_port     = 8529
     protocol    = "tcp"
-    cidr_blocks = ["10.0.1.0/24"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   # outbound internet access

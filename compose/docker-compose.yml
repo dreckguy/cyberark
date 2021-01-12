@@ -12,4 +12,4 @@ services:
     ports:
       - 4000:4000
     environment:
-     - DB_URL=http://${db_private_ip}:8529
+     - DB_URL=http://${db_ip}:8529
