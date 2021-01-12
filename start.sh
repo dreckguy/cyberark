@@ -11,6 +11,6 @@ scp -i key.pem -o "StrictHostKeyChecking no" compose/.env ubuntu@$WEB_APP_1_IP:/
 ssh -i key.pem -o "StrictHostKeyChecking no" ubuntu@$WEB_APP_1_IP "docker-compose -f /home/ubuntu/docker-compose.yml run app init.js"
 ssh -i key.pem -o "StrictHostKeyChecking no" ubuntu@$WEB_APP_1_IP "docker-compose -f /home/ubuntu/docker-compose.yml up -d"
 
-sleep 2s
+sleep 1m
 echo "reading directors:"
 curl "$LB_DNS/directors"
