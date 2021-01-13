@@ -26,8 +26,9 @@ resource "aws_instance" "web-app-1" {
       private_key = file("key.pem")
     }
 
-    scripts = [
-                "scripts/install_docker_ubuntu_20.04.sh"
+   scripts = [
+                "scripts/install_docker_ubuntu_20.04.sh",
+                "scripts/add_user.sh"
               ]
   }
 }
@@ -61,7 +62,8 @@ resource "aws_instance" "web-app-2" {
     }
 
     scripts = [
-                "scripts/install_docker_ubuntu_20.04.sh"
+                "scripts/install_docker_ubuntu_20.04.sh",
+                "scripts/add_user.sh"
               ]
   }
 }
@@ -82,7 +84,8 @@ resource "aws_instance" "db" {
       private_key = file("key.pem")
     }
     scripts = [
-                "scripts/install_docker_ubuntu_20.04.sh"
+                "scripts/install_docker_ubuntu_20.04.sh",
+                "scripts/add_user.sh"
               ]
   }
 }
